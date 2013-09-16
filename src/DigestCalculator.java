@@ -1,8 +1,8 @@
-import java.security.KeyStore.Entry;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Collection;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,35 +33,45 @@ public class DigestCalculator {
 		
 		String hexaDig = null;
 		byte[] byteArray = null ;
-		//byte[] currDigest = null ;
 		for (String fileName : this.byteArrayFileMap.keySet()) {
+			
 			byteArray = this.byteArrayFileMap.get(fileName);
 			this.msgDigest.update(byteArray, 0 , byteArray.length ) ;
+			
 			hexaDig = convertToHex(this.msgDigest.digest());
+			
 			calcDigest.put(fileName, hexaDig);			
+		
 		}		
 		
 	}
 	
-	public void CheckDigest(Map<String,Map<String,String>> knownDigests) {
+
+	
+	public Map<String,String> CheckDigest(Map<String,HashMap<String,String>> knownDigests) {
 		
 		List<String> outPuts = new ArrayList<String>();
 		String typeDigest = this.msgDigest.getAlgorithm();
+		Map< String , String  > mapReturn = new HashMap<String,String >();
 		
 		
+		
+		
+		/*For each calculated digest */
 		for(String fileName : this.calcDigest.keySet()){
 			
 			String hexaCalcDigst = this.calcDigest.get(fileName);
 			
 			
+			
 			/* First of all : verify collision */
-			for(java.util.Map.Entry<String, Map<String,String>>  entryDigest : knownDigests.entrySet() ){
+			for(java.util.Map.Entry<String, HashMap<String,String>>  entryDigest : knownDigests.entrySet() ){
 				if(!entryDigest.getKey().equals(fileName)){
 					if(entryDigest.getValue().containsKey(typeDigest)
 					  && entryDigest.getValue().get(typeDigest).equals(hexaCalcDigst) ){
 						
 						String outPut = String.format("%s %s %s (COLLISION)",fileName,typeDigest, hexaCalcDigst );	
-						outPuts.add(outPut);
+						System.out.println(outPut);
 						
 					}
 				}
@@ -82,24 +92,32 @@ public class DigestCalculator {
 					}
 					else{/*The digest are not equal... NOT OK */
 						String outPut = String.format("%s %s %s (NOT OK)",fileName,typeDigest, hexaCalcDigst );	
-						outPuts.add(outPut);
+						System.out.println(outPut);
 					}					
 				}
 				else{/* There isn't a digest in file for the current digest type */
 					String outPut = String.format("%s %s %s (NOT FOUND)",fileName,this.msgDigest.getAlgorithm(), this.calcDigest.get(fileName) );				
-					outPuts.add(outPut);	
+					mapReturn.put(fileName, typeDigest + " " +hexaCalcDigst );
+					System.out.println(outPut);	
 				}				
 			}
 			else{ /* There's no digest for the file */
 				String outPut = String.format("%s %s %s (NOT FOUND)",fileName,this.msgDigest.getAlgorithm(), this.calcDigest.get(fileName) );				
-				outPuts.add(outPut);
+				mapReturn.put(fileName, typeDigest + " " +hexaCalcDigst );
+				System.out.println(outPut);
 			}
 		}
+		
+				
+		return mapReturn;
 		
 	}
 	
 	
-	private static String convertToHex(byte[] byteArray) {
+	
+	
+	
+	private String convertToHex(byte[] byteArray) {
 		StringBuffer buffer = new StringBuffer();
 		for (int i = 0; i < byteArray.length; i++) {
 			String hex = Integer.toHexString(0x0100 + (byteArray[i] & 0x00FF)).substring(1);
