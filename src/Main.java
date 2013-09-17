@@ -1,9 +1,7 @@
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.RandomAccessFile;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
+
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +20,7 @@ public class Main {
 			System.exit(1);
 		}
 		
-		List<String> paths = Arrays.asList( args );
+		List<String> paths = new LinkedList<String>(Arrays.asList( args ));
 		String digestType = paths.remove(0);
 		String pathFileNDigest = paths.remove(0);
 		
